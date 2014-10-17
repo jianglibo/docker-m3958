@@ -98,7 +98,8 @@
   )
 
 (#{(list 1 2 3)} (list 1 2 3))
-;java -cp ../lib/hsqldb.jar org.hsqldb.util.DatabaseManager
+;java -cp C:\Users\admin\.m2\repository\org\hsqldb\hsqldb\2.3.2\hsqldb.jar org.hsqldb.util.DatabaseManager
+;java -cp C:\Users\admin\.m2\repository\org\hsqldb\hsqldb\2.3.2\hsqldb.jar org.hsqldb.util.DatabaseManagerSwing
 (map :table_name (db-meta))
 (map :column_name (table-meta (str/upper-case (name (first (first tds))))))
 (init-tables)
