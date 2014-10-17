@@ -4,11 +4,11 @@
   (:require [clojure.string :as str])
   (:require [clojure.java.shell :as shell])
   (:require [clojure.java.jdbc :as j])
+  (:require [docker-m3958.dbmodule :as dbmodule])
   (:import java.nio.file.Paths)
   (:import org.hsqldb.jdbc.JDBCDriver)
-  (:import com.mchange.v2.c3p0.ComboPooledDataSource))
-
-(:gen-class)
+  (:import com.mchange.v2.c3p0.ComboPooledDataSource)
+  (:gen-class))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -18,55 +18,12 @@
       (println "bye!")
       (do (println iline) (recur (read-line))))))
 
-;(take-while str/blank? (repeatedly (read-line)))
-;(take-while (comp str/blank? not) ["1" "2" "" "3"])
-
-(def db-filename (if (nil? (re-find #"(?i)windows" (System/getProperty "os.name")))
-                  "/opt/db/hsqldb"
-                  "c:/db/hsqldb"))
+(ns-publics 'docker-m3958.dbmodule)
+(dbmodule/init-tables)
 
 
-(io/make-parents db-filename)
+;(j/query (db-connection) ["SELECT * FROM FRUIT"])
 
-(def db-spec
-  {:classname "org.hsqldb.jdbc.JDBCDriver"
-   :subprotocol "hsqldb"
-   :subname (str "file:" db-filename)
-   :user "aUserName"
-   :password "3xLVz"})
-
-(defn pool
-  [spec]
-  (let [cpds (doto (ComboPooledDataSource.)
-               (.setDriverClass (:classname spec))
-               (.setJdbcUrl (str "jdbc:" (:subprotocol spec) ":" (:subname spec)))
-               (.setUser (:user spec))
-               (.setPassword (:password spec))
-               ;; expire excess connections after 30 minutes of inactivity:
-               (.setMaxIdleTimeExcessConnections (* 30 60))
-               ;; expire connections after 3 hours of inactivity:
-               (.setMaxIdleTime (* 3 60 60)))]
-    {:datasource cpds}))
-
-(def pooled-db (delay (pool db-spec)))
-
-(defn db-connection [] @pooled-db)
-
-
-(j/db-do-commands (db-connection)
-  (j/create-table-ddl :fruit
-                    [:name "varchar(32)" :primary :key]
-                    [:appearance "varchar(32)"]
-                    [:cost :int]
-                    [:grade :real]
-;                    :table-spec "ENGINE=InnoDB"
-                    :entities clojure.string/upper-case))
-
-(j/query (db-connection) ["SELECT * FROM FRUIT"])
-
-(map :table_name
-(j/with-db-metadata [md (db-connection)]
-  (j/metadata-result (.getTables md nil nil nil (into-array ["TABLE"])))))
 
 
 ;(j/execute! db-spec
@@ -174,3 +131,6 @@
 
 ;(j/query db-spec ["SELECT * FROM mixedTable"]
 ;         :identifiers #(.replace % \_ \-))
+
+;(take-while str/blank? (repeatedly (read-line)))
+;(take-while (comp str/blank? not) ["1" "2" "" "3"])
