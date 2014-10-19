@@ -7,6 +7,8 @@
                  [org.clojure/data.json "0.2.5"]
                  [org.clojure/java.jdbc "0.3.5"]
                  [com.mchange/c3p0 "0.9.2.1"]
+                 [org.clojure/math.numeric-tower "0.0.4"]
+                 [com.spotify/docker-client "2.4.2"]
                  [org.hsqldb/hsqldb "2.3.2"]]
   :main ^:skip-aot docker-m3958.core
   :target-path "target/%s"

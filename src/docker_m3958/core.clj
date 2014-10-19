@@ -10,21 +10,76 @@
   (:import com.mchange.v2.c3p0.ComboPooledDataSource)
   (:gen-class))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (loop [iline nil]
-    (if (or (= iline "exit") (= iline "quit"))
-      (println "bye!")
-      (do (println iline) (recur (read-line))))))
+;(defn -main
+;  "I don't do a whole lot ... yet."
+;  [& args]
+;  (loop [iline nil]
+;    (when (or (= iline "exit") (= iline "quit"))
+;      (println "bye!"))
+;    (when (nil? iline)
+;      (println "welcom"))
+;    (recur (read-line))))
 
 (ns-publics 'docker-m3958.dbmodule)
+
 (dbmodule/init-tables)
 
 
+(defn sql-tool []
+  (loop [iline (read-line)]
+    (if (or (= "quit" iline) (= "exit" iline))
+      (println "bye")
+      (do
+       (println iline)
+        (recur (read-line))))))
+
+(defn while-test []
+  (let [iline (read-line)]
+    (condp (fn [v & o] (#{"exit" "quit"} v)) iline
+      "quit" false
+      "exit" false
+      (do (println iline) true))))
+
+(defn do-action [action]
+  (println action)
+  )
+
+(defn while-test []
+  (let [iline (read-line)]
+    (condp = iline
+      "quit" false
+      "exit" false
+      (do (do-action iline) true))))
+
+(defn while-breakable []
+  (while (while-test)))
+
+(let [[a & b] (str/split "x y z" #"\s+")]
+  [a b]
+  )
+;(when (list) "abc")
+;((set (list :a :b)) :b)
+;
+;(some-> (#{:a} :a) (name))
+;(:b (set (list :a :b)))
+;
+;(#(%1 %2) #{"quit" "exit" nil} "exit")
+;
+;(#{"quit"} "quit")
+;
+;(condp #(%2 %1) #{"quit" "exit" nil}
+;  nil (println "welcome")
+;  "exit" (println "bye")
+;  "quit" (println "bye")
+;
+;  )
+
+;symbol is just a name. for example x, when occure some where, we got x's value.
+
+
 ;(j/query (db-connection) ["SELECT * FROM FRUIT"])
-
-
+;(filter #(re-find #"dbmodule" (str %)) (map ns-name (all-ns)))
+;(map ns-name (all-ns))
 
 ;(j/execute! db-spec
 ;            ["update fruit set cost = ( 2 * grade ) where grade > ?" 50.0])
