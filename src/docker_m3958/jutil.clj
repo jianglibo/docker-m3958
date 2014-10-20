@@ -16,6 +16,26 @@
   []
   (re-find #"(?i)windows" (System/getProperty "os.name")))
 
-(defn working-dir
+(defn user-home
   []
   (System/getProperty "user.home"))
+
+
+
+(defn filename
+  [& pp]
+  (if-not pp
+    nil
+    (->
+     (Paths/get (first pp) (into-array String (rest pp)))
+     (.normalize)
+     (.toAbsolutePath)
+     (.toString))))
+
+(defn filename-in-user-home
+  [& pp]
+  (if pp
+    (apply filename (user-home) pp)))
+
+(defn random-name [size]
+  (str/join (take size (repeatedly #(rand-nth "0123456789abcdefghijklmnopqrstuvwxyz")))))

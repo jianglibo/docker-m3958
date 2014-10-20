@@ -14,6 +14,7 @@
 ;:table-spec "ENGINE=InnoDB"
 (def pooled-db-ref)
 
+
 (defn init-db-path []
   (io/make-parents const/DB-PATH))
 
@@ -37,14 +38,20 @@
                (.setMaxIdleTime (* 3 60 60)))]
     {:datasource cpds}))
 
+
 (defn- init-pool-var
   [db-path]
   (def pooled-db-ref (delay (pool (db-spec db-path)))))
 
 (defn init
   [& args]
-  (if (bound? #'pooled-db-ref) (throw (Exception. "pooled-db-ref already initialized."))
-    (if args (init-pool-var const/DB-PATH) (init-pool-var (first args)))))
+  (if args
+    (init-pool-var (first args))
+    (init-pool-var const/DB-PATH)))
+
+(defn cleanup
+  []
+  (.close (:datasource @pooled-db-ref)))
 
 (defn db-connection [] @pooled-db-ref)
 
@@ -73,14 +80,14 @@
 
 
 (defn init-tables []
-  (for [td const/TABLE-DSCS :let [tname (name (first td))]]
+  (for [td (map const/TABLE-DSCS [:app :apptpl :image :host :container :apptpl_image]) :let [tname (name (first td))]]
     (do
       (j/db-do-commands (db-connection)
                       (if-not (table-exist? tname)
                         (apply j/create-table-ddl td))))))
 
 (defn drop-tables []
-  (for [td const/TABLE-DSCS :let [tname (first td)]]
+  (for [td (map const/TABLE-DSCS [:container :apptpl_image :app :apptpl :image :host]) :let [tname (first td)]]
     (j/db-do-commands (db-connection)
                       (j/drop-table-ddl tname))))
 
@@ -92,8 +99,12 @@
   (j/query (db-connection) ["SELECT * FROM apptpl"]
            :identifiers #(.replace % \_ \-)))
 
-(defn random-name [size]
-  (str/join (take size (repeatedly #(rand-nth "0123456789abcdefghijklmnopqrstuvwxyz")))))
+
+
+;(defn init
+;  [& args]
+;  (if (bound? #'pooled-db-ref) (throw (Exception. "pooled-db-ref already initialized."))
+;    (if args (init-pool-var const/DB-PATH) (init-pool-var (first args)))))
 
 ;(random-name 5)
 

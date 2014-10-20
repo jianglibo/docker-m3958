@@ -1,31 +1,54 @@
-(ns docker-m3958.core-test
-  (:require [clojure.test :refer :all]
-            [clojure.test.junit :refer :all]
-            [clojure.test.tap :refer :all]
-            [docker-m3958.dbmodule :as dbmodule]))
+(ns docker-m3958.dbmodule-test
+  (:require [clojure.test :refer :all])
+  (:require [clojure.java.io :as io])
+  (:require [clojure.test.junit :refer :all])
+  (:require [docker-m3958.jutil :as jutil])
+  (:require [clojure.test.tap :refer :all])
+  (:require [docker-m3958.dbmodule :as dbmodule]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1) "0 not equal to 1")))
+(def dbpath (delay (jutil/filename-in-user-home "testdb" "fixturedb")))
 
-(def x 5)
+
+(io/make-parents @dbpath)
+
+(defn dbfixture
+  [f]
+  (dbmodule/init @dbpath)
+  (f)
+  (dbmodule/cleanup))
+
+(use-fixtures :once dbfixture)
+
+(def x 6)
 
 (deftest re-binding-test
-  (is (thrown? IllegalStateException (binding [x 6] x)))
-  (is (thrown-with-msg? IllegalStateException #"bind non-dynamic var" (binding [x 6] x))))
+  (is (thrown? IllegalStateException (binding [x 6] x)) "static var cann't binding")
+  (is (thrown-with-msg? IllegalStateException #"bind non-dynamic var" (binding [x 6] x))) "bind non-dynamic var")
 
-(with-junit-output
-  (run-tests))
+(deftest addition
+  (is (= 4 (+ 2 2)))
+  (is (= 7 (+ 3 4))))
 
-(with-tap-output
-   (run-tests))
 
-(dbmodule/init "fixturedb")
+;(with-junit-output
+;  (run-tests))
 
-(dbmodule/init-tables)
+(deftest create-tables
+  (is (= (repeat 6 '(0)) (dbmodule/init-tables)))
+  (is (= (repeat 6 '(0)) (dbmodule/drop-tables))))
 
-(assoc {:a "a" :b "b"} :a "new a")
-(def z)
-(bound? (var z))
+(run-tests)
 
-::x
+;(dbmodule/init @dbpath)
+;(dbmodule/init-tables)
+;(dbmodule/drop-tables)
+;(dbmodule/all-table-names)
+
+
+;(deftest a-test
+;  (testing "FIXME, I fail."
+;    (is (= 0 1) "0 not equal to 1")))
+
+
+;(with-tap-output
+;   (run-tests))
