@@ -9,6 +9,8 @@
                  [com.mchange/c3p0 "0.9.2.1"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [com.spotify/docker-client "2.4.2"]
+                 [org.apache.shiro/shiro-core "1.2.3"]
+                 [org.apache.shiro/shiro-ehcache "1.2.3"]
                  [org.hsqldb/hsqldb "2.3.2"]]
   :main ^:skip-aot docker-m3958.core
   :target-path "target/%s"
