@@ -78,16 +78,19 @@
 (defn get-table-ddl [td]
   (apply j/create-table-ddl td))
 
+(defn create-table
+  "create one table."
+  [td]
+  (try
+    (j/db-do-commands (db-connection) (apply j/create-table-ddl td))
+    (catch Exception e)))
 
 (defn init-tables []
-  (for [td (map const/TABLE-DSCS [:app :apptpl :image :host :container :apptpl_image]) :let [tname (name (first td))]]
-    (do
-      (j/db-do-commands (db-connection)
-                      (if-not (table-exist? tname)
-                        (apply j/create-table-ddl td))))))
+  (for [td (map const/TABLE-DSCS [:app :apptpl :image :host :container :apptpl_image])]
+    (create-table td)))
 
 (defn drop-tables []
-  (for [td (map const/TABLE-DSCS [:container :apptpl_image :app :apptpl :image :host]) :let [tname (first td)]]
+  (for [tname (map name [:container :apptpl_image :app :apptpl :image :host])]
     (j/db-do-commands (db-connection)
                       (j/drop-table-ddl tname))))
 
